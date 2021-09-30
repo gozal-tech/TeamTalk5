@@ -1,9 +1,6 @@
 name: Windows with Qt
 
-on:
-  push:
-    paths:
-      - 'Library/TeamTalkLib/TeamTalkDefs.h'
+on: [push]
 
 jobs:
   msvc:
