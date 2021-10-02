@@ -5,7 +5,7 @@ project(Qt)
 include(ExternalProject)
 
 set (QT_BUILD_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build CACHE STRING "Specify alternative 'clone' directory to build Qt Framework dependencies. Default: CMAKE_CURRENT_BINARY_DIR/build")
-set (QT_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "Install path for Qt Framework. Default: CMAKE_CURRENT_BINARY_DIR/install")
+set (QT_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install/Qt CACHE STRING "Install path for Qt Framework. Default: CMAKE_CURRENT_BINARY_DIR/install")
 
 if (MSVC)
   if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
@@ -34,7 +34,7 @@ if (MSVC)
       BUILD_COMMAND     set CL=/MP
       COMMAND           nmake
       INSTALL_DIR       ${QT_INSTALL_PREFIX}/openssl
-      INSTALL_COMMAND   nmake install
+    INSTALL_COMMAND   nmake install_sw
       )
     ExternalProject_Get_Property(Qt-openssl-src INSTALL_DIR)
     set (OPENSSL_DIR ${INSTALL_DIR})
@@ -60,22 +60,19 @@ if (MSVC)
   ExternalProject_Add(Qt-src
     PREFIX            ${QT_BUILD_PREFIX}
     GIT_REPOSITORY    https://github.com/qt/qt5
-    GIT_TAG           v5.15.1
-    GIT_SUBMODULES    qtbase qttools qtmultimedia qtactiveqt qtspeech
+  GIT_TAG           v6.2.0
+  GIT_SUBMODULES    qtbase qttools qtmultimedia qtspeech qtshadertools
     GIT_SHALLOW       TRUE
     UPDATE_COMMAND    ""
     PATCH_COMMAND     cd qtbase
-    COMMAND           git apply ${CMAKE_CURRENT_LIST_DIR}\\qt_v5.15.1_win.patch
+  COMMAND           git apply ${CMAKE_CURRENT_LIST_DIR}\\qt_v6.2.0_win.patch
     COMMAND           cd ..
-    CONFIGURE_COMMAND CALL <SOURCE_DIR>\\configure.bat -opensource -confirm-license -static -nomake examples -openssl-linked -I${OPENSSL_DIR_NATIVE}\\include "OPENSSL_LIBS= -L${OPENSSL_DIR_NATIVE}\\lib -lUser32 -lAdvapi32 -lGdi32 -lCrypt32 -lws2_32 -llibssl -llibcrypto" -prefix ${QT_INSTALL_PREFIX_NATIVE}
-    BUILD_COMMAND     set CL=/MP
-    COMMAND           CALL nmake
+  CONFIGURE_COMMAND CALL <SOURCE_DIR>\\configure.bat -opensource -confirm-license -static -nomake examples -openssl-linked -prefix ${QT_INSTALL_PREFIX_NATIVE} -- -D OPENSSL_ROOT_DIR=${OPENSSL_DIR} -D OPENSSL_USE_STATIC_LIBS=ON
+  BUILD_COMMAND     CALL ${CMAKE_COMMAND} --build . --parallel
     INSTALL_DIR       ${QT_INSTALL_PREFIX}
-    INSTALL_COMMAND   set CL=/MP
-    COMMAND           CALL nmake install
+  INSTALL_COMMAND   CALL ${CMAKE_COMMAND} --install .
     DEPENDS           Qt-openssl-src
     )
-  ExternalProject_Get_Property(Qt-src SOURCE_DIR)
   
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
