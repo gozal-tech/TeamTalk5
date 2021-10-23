@@ -13,12 +13,17 @@ set (TOOLCHAIN_INSTALL_PREFIX_LIBVPX ${TOOLCHAIN_INSTALL_PREFIX}/libvpx)
 if (MSVC)
 
   if (TOOLCHAIN_BUILD_EXTERNALPROJECTS)
-    find_program(CYGWIN_BASH_EXE_PATH bash.exe PATHS C:/cygwin64/bin)
-    if (CYGWIN_BASH_EXE_PATH-NOTFOUND)
-      message(WARNING "CYGWIN bash.exe is required to build libvpx")
+    # Favor Cygwin or MSYS2 since CMake may otherwise find a
+    # non-working bash.exe file. GitHub e.g. finds C:/Program
+    # Files/Git/bin/bash.exe which cannot be used.
+    find_program(BASH_EXE_PATH bash.exe PATHS C:/cygwin64/bin C:/msys64/usr/bin $ENV{PATH} NO_DEFAULT_PATH)
+    if (BASH_EXE_PATH-NOTFOUND)
+      message(WARNING "CYGWIN or MSYS2 bash.exe is required to build libvpx")
     else()
-      message("Found CYGWIN for libvpx here: ${CYGWIN_BASH_EXE_PATH}")
+      message("Found bash.exe CYGWIN/MSYS2 for libvpx here: ${BASH_EXE_PATH}")
     endif()
+
+    file(TO_NATIVE_PATH ${BASH_EXE_PATH} BASH_EXE_PATH_NATIVE)
 
     if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
       find_program(YASM_EXE_WIN64_PATH yasm.exe PATHS C:/tt5dist/yasm/x64)
@@ -38,7 +43,7 @@ if (MSVC)
         CONFIGURE_COMMAND ""
         BUILD_COMMAND     IF EXIST build-x64 rmdir /Q /S build-x64
         COMMAND           mkdir build-x64
-        COMMAND           C:\\cygwin64\\bin\\bash.exe --login -c "cd $OLDPWD/build-x64 && ../configure --target=x86_64-win64-vs16 --disable-examples --disable-docs --enable-static-msvcrt --disable-unit-tests && make"
+        COMMAND           ${BASH_EXE_PATH_NATIVE} --login -c "cd $OLDPWD/build-x64 && ../configure --target=x86_64-win64-vs16 --disable-examples --disable-docs --enable-static-msvcrt --disable-unit-tests && make"
         INSTALL_DIR       ${TOOLCHAIN_INSTALL_PREFIX_LIBVPX}
         INSTALL_COMMAND   cd <SOURCE_DIR>
         COMMAND           ${CMAKE_CURRENT_LIST_DIR}\\..\\install_headers.bat <INSTALL_DIR>
@@ -64,7 +69,7 @@ if (MSVC)
         CONFIGURE_COMMAND ""
         BUILD_COMMAND     IF EXIST build-win32 rmdir /Q /S build-win32
         COMMAND           mkdir build-win32
-        COMMAND           C:\\cygwin64\\bin\\bash.exe --login -c "cd $OLDPWD/build-win32 && ../configure --target=x86-win32-vs16 --disable-examples --disable-docs --enable-static-msvcrt --disable-unit-tests && make"
+        COMMAND           ${BASH_EXE_PATH_NATIVE} --login -c "cd $OLDPWD/build-win32 && ../configure --target=x86-win32-vs16 --disable-examples --disable-docs --enable-static-msvcrt --disable-unit-tests && make"
         INSTALL_DIR       ${TOOLCHAIN_INSTALL_PREFIX_LIBVPX}
         INSTALL_COMMAND   cd <SOURCE_DIR>
         COMMAND           ${CMAKE_CURRENT_LIST_DIR}\\..\\install_headers.bat <INSTALL_DIR>
