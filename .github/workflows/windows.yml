@@ -20,17 +20,38 @@ jobs:
             vmimage: windows-2019
             cmakeplatform: Win32
             dotnetarch: x86
+            msystem: MINGW32
+            vcpkgarch: x86-windows
           - name: VS2019Release64
             vmimage: windows-2019
             cmakeplatform: x64
             dotnetarch: x64
+            msystem: MINGW64
+            vcpkgarch: x64-windows
+
     runs-on: ${{ matrix.vmimage }}
     name: ${{ matrix.name }}
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup VSTest Path
+    - name: Setup VSTest Path for .NET unit tests
       uses: darenm/Setup-VSTest@v1
+
+    - name: Setup msbuild in PATH
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Install MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        path-type: inherit
+        install: make
+
+    - name: Install YASM for libvpx compilation
+      shell: cmd
+      run: |
+        vcpkg install --recurse yasm --triplet ${{ matrix.vcpkgarch }} --clean-after-build
+        echo %VCPKG_INSTALLATION_ROOT%\installed\${{ matrix.vcpkgarch }}\tools\yasm>> %GITHUB_PATH%
 
     - name: Init TeamTalk Client submodules
       working-directory: ${{runner.workspace}}/TeamTalk5
@@ -44,9 +65,7 @@ jobs:
         cmake -S TeamTalk5 -B output -A ${{ matrix.cmakeplatform }}
         -DBUILD_TEAMTALK_CORE=ON
         -DCATCH_UNITTEST=ON
-        -DFEATURE_LIBVPX=OFF
         -DFEATURE_WEBRTC=OFF
-        -DTOOLCHAIN_LIBVPX=OFF
         -DBUILD_TEAMTALK_CLIENT_DOTNET_EXAMPLE=OFF
         -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/install-${{ matrix.dotnetarch }}
 
