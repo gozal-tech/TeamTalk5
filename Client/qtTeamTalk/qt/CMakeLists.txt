@@ -60,17 +60,17 @@ if (MSVC)
   ExternalProject_Add(Qt-src
     PREFIX            ${QT_BUILD_PREFIX}
     GIT_REPOSITORY    https://github.com/qt/qt5
-  GIT_TAG           v6.2.0
-  GIT_SUBMODULES    qtbase qttools qtmultimedia qtspeech qtshadertools
+    GIT_TAG           v6.2.0
+    GIT_SUBMODULES    qtbase qttools qtmultimedia qtspeech qtshadertools
     GIT_SHALLOW       TRUE
     UPDATE_COMMAND    ""
     PATCH_COMMAND     cd qtbase
-  COMMAND           git apply ${CMAKE_CURRENT_LIST_DIR}\\qt_v6.2.0_win.patch
+    COMMAND           git apply ${CMAKE_CURRENT_LIST_DIR}\\qt_v6.2.0_win.patch
     COMMAND           cd ..
-  CONFIGURE_COMMAND CALL <SOURCE_DIR>\\configure.bat -opensource -confirm-license -static -nomake examples -openssl-linked -prefix ${QT_INSTALL_PREFIX_NATIVE} -- -D OPENSSL_ROOT_DIR=${OPENSSL_DIR} -D OPENSSL_USE_STATIC_LIBS=ON
-  BUILD_COMMAND     CALL ${CMAKE_COMMAND} --build . --parallel
+    CONFIGURE_COMMAND CALL <SOURCE_DIR>\\configure.bat -opensource -confirm-license -static -nomake examples -openssl-linked -prefix ${QT_INSTALL_PREFIX_NATIVE} -- -D OPENSSL_ROOT_DIR=${OPENSSL_DIR} -D OPENSSL_USE_STATIC_LIBS=ON
+    BUILD_COMMAND     CALL ${CMAKE_COMMAND} --build . --parallel
     INSTALL_DIR       ${QT_INSTALL_PREFIX}
-  INSTALL_COMMAND   CALL ${CMAKE_COMMAND} --install .
+    INSTALL_COMMAND   CALL ${CMAKE_COMMAND} --install .
     DEPENDS           Qt-openssl-src
     )
   
@@ -79,14 +79,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   ExternalProject_Add(Qt-src
     PREFIX            ${QT_BUILD_PREFIX}
     GIT_REPOSITORY    https://github.com/qt/qt5
-    GIT_TAG           v5.15.0
-    GIT_SUBMODULES    qtbase qttools qtmultimedia qtspeech
+    GIT_TAG           v6.2.0
+    GIT_SUBMODULES    qtbase qttools qtmultimedia qtshadertools qtspeech
     GIT_SHALLOW       TRUE
     UPDATE_COMMAND    ""
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> -appstore-compliant -confirm-license -opensource -nomake examples -nomake tests
-    BUILD_COMMAND     make -j4
+    BUILD_COMMAND     ${CMAKE_COMMAND} --build . --parallel
     INSTALL_DIR       ${QT_INSTALL_PREFIX}
-    INSTALL_COMMAND   make -j4 install
+    INSTALL_COMMAND   ${CMAKE_COMMAND} --install .
     )
   ExternalProject_Get_Property(Qt-src SOURCE_DIR)
   
