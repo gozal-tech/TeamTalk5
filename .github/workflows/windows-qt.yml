@@ -2,6 +2,7 @@ name: Windows with Qt
 
 on:
   push:
+  workflow_dispatch:
     paths:
       - 'Library/TeamTalkLib/TeamTalkDefs.h'
 
@@ -16,12 +17,6 @@ jobs:
             arch: win32
             msystem: MINGW32
             portablearch: win32
-          - name: VS2019Release64
-            vmimage: windows-2019
-            cmakeplatform: x64
-            arch: x64
-            msystem: MINGW64
-            portablearch: win64
 
     runs-on: ${{ matrix.vmimage }}
     name: ${{ matrix.name }}
