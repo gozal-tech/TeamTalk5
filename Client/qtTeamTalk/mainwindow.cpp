@@ -2359,7 +2359,7 @@ void MainWindow::changeEvent(QEvent* event )
                     m_sysmenu->addSeparator();
                     m_sysmenu->addAction(exit);
                     m_sysicon->setContextMenu(m_sysmenu);
-                    m_sysicon->setToolTip(APPTITLE);
+                    m_sysicon->setToolTip(getTitle());
                 }
                 //choose icon to show in sys tray
                 QString rc_icon;
@@ -2407,33 +2407,7 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message,
 
 void MainWindow::updateWindowTitle()
 {
-    QString profilename, title = APPTITLE;
-    if(ttSettings)
-        profilename = ttSettings->value(SETTINGS_GENERAL_PROFILENAME).toString();
-
-    ServerProperties prop = {};
-    bool Servname = ttSettings->value(SETTINGS_DISPLAY_SERVNAME, SETTINGS_DISPLAY_SERVNAME_DEFAULT).toBool();
-    if(m_mychannel.nChannelID > 0 &&
-       m_mychannel.nChannelID != TT_GetRootChannelID(ttInst))
-    {
-        if (Servname)
-        {
-            TT_GetServerProperties(ttInst, &prop);
-            title = QString("%1/%2 - %3").arg(limitText(_Q(prop.szServerName))).arg(limitText(_Q(m_mychannel.szName))).arg(APPTITLE);
-        }
-        else
-        {
-            title = QString("%1 - %2").arg(limitText(_Q(m_mychannel.szName))).arg(APPTITLE);
-        }
-    }
-    else if (TT_GetServerProperties(ttInst, &prop))
-    {
-        title = QString("%1 - %2").arg(limitText(_Q(prop.szServerName))).arg(APPTITLE);
-    }
-
-    if(profilename.size())
-        title = QString("%1 - %2").arg(title).arg(profilename);
-    setWindowTitle(title);
+    setWindowTitle(getTitle());
 }
 
 #if defined(Q_OS_WIN32)

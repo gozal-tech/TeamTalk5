@@ -1146,3 +1146,34 @@ bool writeLogEntry(QFile& file, const QString& line)
 {
     return file.write(QString(line + "\r\n").toUtf8())>0;
 }
+
+QString getTitle()
+{
+    QString profilename, title = APPTITLE;
+    if(ttSettings)
+        profilename = ttSettings->value(SETTINGS_GENERAL_PROFILENAME).toString();
+
+    ServerProperties prop = {};
+    bool Servname = ttSettings->value(SETTINGS_DISPLAY_SERVNAME, SETTINGS_DISPLAY_SERVNAME_DEFAULT).toBool();
+    if(m_mychannel.nChannelID > 0 &&
+       m_mychannel.nChannelID != TT_GetRootChannelID(ttInst))
+    {
+        if (Servname)
+        {
+            TT_GetServerProperties(ttInst, &prop);
+            title = QString("%1/%2 - %3").arg(limitText(_Q(prop.szServerName))).arg(limitText(_Q(m_mychannel.szName))).arg(APPTITLE);
+        }
+        else
+        {
+            title = QString("%1 - %2").arg(limitText(_Q(m_mychannel.szName))).arg(APPTITLE);
+        }
+    }
+    else if (TT_GetServerProperties(ttInst, &prop))
+    {
+        title = QString("%1 - %2").arg(limitText(_Q(prop.szServerName))).arg(APPTITLE);
+    }
+
+    if(profilename.size())
+        title = QString("%1 - %2").arg(title).arg(profilename);
+    return title;
+}

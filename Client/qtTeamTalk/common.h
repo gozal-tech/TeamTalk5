@@ -390,5 +390,6 @@ QString getDateTimeStamp();
 QString generateLogFileName(const QString& name);
 bool openLogFile(QFile& file, const QString& folder, const QString& name);
 bool writeLogEntry(QFile& file, const QString& line);
+QString getTitle();
 
 #endif
